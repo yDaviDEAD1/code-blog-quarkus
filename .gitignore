@@ -17,6 +17,9 @@ bin/
 *.ipr
 *.iml
 *.iws
+.dockerignore
+.github
+
 
 # NetBeans
 nb-configuration.xml
