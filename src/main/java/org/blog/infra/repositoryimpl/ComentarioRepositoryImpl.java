@@ -12,7 +12,7 @@ public class ComentarioRepositoryImpl implements IComentarioRepository, PanacheR
     
     @Override
     public void persist(ComentarioModel comentario) {
-        persist(comentario);
+        PanacheRepository.super.persist(comentario);
     }
 
     @Override

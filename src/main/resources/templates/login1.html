@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{title}</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+
+<header>
+  <h1>Acesso ao Blog</h1>
+</header>
+
+<main>
+
+  <section id="auth-page-section" class="fade-in">
+    <h2>Login ou Novo Registro</h2>
+
+    <div class="auth-toggle">
+      <button id="showLogin">Fazer Login</button>
+      <button id="showRegister">Novo Registro</button>
+    </div>
+
+    <div id="login-view-container">
+      <form id="loginForm" class="smooth-card">
+        <input type="email" id="email" placeholder="Email" required>
+        <input type="password" id="senha" placeholder="Senha" required>
+        <button type="submit">Entrar</button>
+      </form>
+      <p id="auth-status" class="error"></p>
+      <p class="mt-15">
+        <a href="/">Voltar para a Home</a>
+      </p>
+    </div>
+
+    <div id="register-view-container" style="display: none;">
+      <form id="registerForm" class="smooth-card">
+        <input type="text" id="register-nome" placeholder="Seu Nome" required>
+        <input type="email" id="register-email" placeholder="Email" required>
+        <input type="password" id="register-senha" placeholder="Senha" required>
+        <button type="submit">Registrar-se (Leitor)</button>
+      </form>
+      <p id="register-status" class="error"></p>
+      <p class="mt-15">
+        <a href="/">Voltar para a Home</a>
+      </p>
+    </div>
+  </section>
+
+</main>
+
+<script src="/script.js"></script>
+</body>
+</html>

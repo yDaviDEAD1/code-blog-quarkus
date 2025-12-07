@@ -1,6 +1,7 @@
 package org.blog.infra.web.controller;
 
 import io.quarkus.security.identity.SecurityIdentity;
+import jakarta.annotation.security.PermitAll;
 import jakarta.annotation.security.RolesAllowed; // Use RolesAllowed para forçar a autenticação
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Consumes;
@@ -23,8 +24,6 @@ public class AuthController {
     @Inject
     IUsuarioService usuarioService;
 
-    // Este endpoint apenas verifica se o Basic Auth foi bem-sucedido.
-    // O Quarkus/JAX-RS forçará a autenticação antes de entrar neste método.
     @POST
     @Path("/login")
     @RolesAllowed({"ADMIN", "EDITOR", "LEITOR"}) // Força que um usuário autenticado (com qualquer papel) chegue aqui
@@ -41,6 +40,24 @@ public class AuthController {
 
         // Isso é um fallback, pois o 401 deve ser gerado antes pelo Quarkus se falhar
         return Response.status(Response.Status.UNAUTHORIZED).build();
+    }
+
+    @POST
+    @Path("/register")
+    @PermitAll // 💡 Permite que qualquer um crie um usuário
+    public Response register(UsuarioDTO registroDTO) {
+        try {
+            UsuarioDTO created = usuarioService.criarNovoUsuario(
+                    registroDTO.getNome(),
+                    registroDTO.getEmail(),
+                    registroDTO.getSenha(),
+                    "LEITOR" // Atribui a role padrão para o registro público
+            );
+            return Response.status(Response.Status.CREATED).entity(created).build();
+        } catch (IllegalAccessException e) {
+            // Email já cadastrado
+            return Response.status(Response.Status.CONFLICT).entity(e.getMessage()).build();
+        }
     }
 
     @POST

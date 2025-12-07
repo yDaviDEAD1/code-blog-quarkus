@@ -10,29 +10,19 @@
 
 <header>
   <h1>Meu Blog Básico em Quarkus</h1>
+  <div id="auth-button-container">
+  </div>
 </header>
 
 <main>
 
-  <section id="auth-section" class="fade-in">
-    <h2>Acesso</h2>
-
-    <div id="logged-out-view">
-      <form id="loginForm" class="smooth-card">
-        <input type="email" id="email" placeholder="Email" required>
-        <input type="password" id="senha" placeholder="Senha" required>
-        <button type="submit">Entrar</button>
-      </form>
-      <p id="auth-status" class="error"></p>
-    </div>
-
-    <div id="logged-in-view" style="display: none;" class="fade-in">
+  <section id="auth-status-section" class="fade-in">
+    <div id="logged-in-view" style="display: none;">
       <p>Bem-vindo(a), <strong id="username-display"></strong> <span class="role-tag" id="role-display"></span></p>
-      <button id="logoutButton">Sair</button>
     </div>
   </section>
 
-  <section id="post-creation-section" style="display: none;" class="fade-in">
+  <section id="post-creation-section" style="display: none;">
     <h2>Nova Notícia</h2>
     <form id="postForm" class="smooth-card">
       <input type="text" id="post-title" placeholder="Título da Notícia" required>

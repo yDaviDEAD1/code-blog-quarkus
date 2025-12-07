@@ -11,7 +11,7 @@ import org.blog.core.service.IUsuarioService;
 @Path("/admin/usuarios")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
-@RolesAllowed("ADMIN") // ⬅️ Protege TODAS as rotas desta classe para apenas ADMIN
+@RolesAllowed("ADMIN")
 public class UsuarioAdminController {
 
     @Inject

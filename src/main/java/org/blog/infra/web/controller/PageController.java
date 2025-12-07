@@ -2,6 +2,7 @@ package org.blog.infra.web.controller;
 
 import io.quarkus.qute.Template;
 import io.quarkus.qute.TemplateInstance;
+import jakarta.annotation.security.PermitAll;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
@@ -11,14 +12,26 @@ import jakarta.ws.rs.core.MediaType;
 @Path("/")
 public class PageController {
 
-    // Injeta o template (deve estar em src/main/resources/templates/index.html)
     @Inject 
-    Template index; 
+    Template index;
+
+    @Inject
+    Template login1;
 
     @GET
     @Produces(MediaType.TEXT_HTML)
     public TemplateInstance getIndex() {
         return index.data("title", "Bem-Vindo ao Blog Básico");
+
+
+    }
+
+    @GET
+    @Path("login1") // 💡 ESTA É A ROTA QUE ESTAVA FALTANDO!
+    @Produces(MediaType.TEXT_HTML)
+    @PermitAll
+    public TemplateInstance getAuthPage() {
+        return login1.data("title", "Acesso - Login ou Registro");
     }
 
 }
