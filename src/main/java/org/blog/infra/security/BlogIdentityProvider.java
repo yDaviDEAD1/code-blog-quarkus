@@ -7,6 +7,7 @@ import io.quarkus.security.identity.SecurityIdentity;
 import io.quarkus.security.identity.request.UsernamePasswordAuthenticationRequest;
 import io.quarkus.security.runtime.QuarkusSecurityIdentity;
 import io.smallrye.mutiny.Uni;
+import io.smallrye.mutiny.infrastructure.Infrastructure;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import org.blog.core.service.IUsuarioService;
@@ -28,30 +29,35 @@ public class BlogIdentityProvider implements IdentityProvider<UsernamePasswordAu
     @Override
     public Uni<SecurityIdentity> authenticate(UsernamePasswordAuthenticationRequest request, AuthenticationRequestContext authenticationRequestContext) {
         String email = request.getUsername();
-        PasswordCredential credential = request.getPassword(); // Obtém o objeto PasswordCredential
+        PasswordCredential credential = request.getPassword();
 
         char[] passwordArray = credential.getPassword();
         String plainPassword = new String(passwordArray);
         Arrays.fill(passwordArray, ' ');
-        Optional<UsuarioModel> userOptional = usuarioService.buscarModelPorEmail(email);
 
-        if (userOptional.isEmpty()) {
-            return Uni.createFrom().nullItem();
-        }
+        // 💡 1. Mude o contexto de execução para o Worker Thread ANTES de chamar o código bloqueante
+        return Uni.createFrom().item(() -> {
 
-        UsuarioModel user = userOptional.get();
-        if (usuarioService.checkPassword(plainPassword, user.getSenha())) {
-            Set<String> roles = Set.of(user.getPapel());
+                    Optional<UsuarioModel> userOptional = usuarioService.buscarModelPorEmail(email);
 
-            return Uni.createFrom().item(
-                    QuarkusSecurityIdentity.builder()
-                            .setPrincipal(user::getEmail)
-                            .addRoles(roles)
-                            .build()
-            );
-        }
+                    if (userOptional.isEmpty()) {
+                        return null;
+                    }
 
-        return Uni.createFrom().nullItem();
+                    UsuarioModel user = userOptional.get();
+                    if (usuarioService.checkPassword(plainPassword, user.getSenha())) {
+
+                        // 💡 AQUI: Crie e retorne a SecurityIdentity (que é o tipo pai)
+                        // O compilador deve conseguir inferir que este é o tipo correto.
+                        return (SecurityIdentity) QuarkusSecurityIdentity.builder()
+                                .setPrincipal(user::getEmail)
+                                .addRoles(Set.of(user.getPapel()))
+                                .build();
+                    }
+                    return null;
+                })
+                // Força a execução no Worker Pool para evitar o erro de bloqueio
+                .runSubscriptionOn(Infrastructure.getDefaultWorkerPool());
     }
     }
 

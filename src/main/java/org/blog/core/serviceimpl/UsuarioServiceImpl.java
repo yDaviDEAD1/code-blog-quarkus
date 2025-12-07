@@ -1,6 +1,7 @@
 package org.blog.core.serviceimpl;
 
 import io.quarkus.elytron.security.common.BcryptUtil;
+import io.smallrye.common.annotation.Blocking;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;

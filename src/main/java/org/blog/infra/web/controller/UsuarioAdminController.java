@@ -24,7 +24,7 @@ public class UsuarioAdminController {
             UsuarioDTO created = usuarioService.criarNovoUsuario(
                 novoUsuario.getNome(), 
                 novoUsuario.getEmail(), 
-                "senha_temporaria", //todo mudar para gerar senha
+                novoUsuario.getSenha(),
                 novoUsuario.getRole()
             );
             return Response.status(Response.Status.CREATED).entity(created).build();

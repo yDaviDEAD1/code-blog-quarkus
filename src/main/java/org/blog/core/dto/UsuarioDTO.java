@@ -15,6 +15,7 @@ public class UsuarioDTO {
     private String nome;
     private String email;
     private String role;
+    private String senha;
 
     public static UsuarioDTO from(UsuarioModel model) {
         // Usa o construtor AllArgsConstructor ou setters
@@ -22,7 +23,8 @@ public class UsuarioDTO {
                 model.getId(),
                 model.getNome(),
                 model.getEmail(), // ⬅️ CORREÇÃO AQUI! Deve ser getEmail()
-                model.getPapel()
+                model.getPapel(),
+                null // Não expõe a senha no DTO
         );
     }
 }

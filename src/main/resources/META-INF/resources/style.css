@@ -1,0 +1,188 @@
+/* Tema Moderno */
+:root {
+    --primary-color: #0066ff;
+    --primary-dark: #0047b3;
+    --secondary-color: #6c757d;
+    --background-light: #f1f3f5;
+    --card-background: #ffffff;
+    --border-color: #e2e6ea;
+    --shadow-light: rgba(0, 0, 0, 0.08);
+    --shadow-strong: rgba(0, 0, 0, 0.12);
+    --radius: 10px;
+    --transition: 0.25s ease;
+}
+
+body {
+    font-family: "Inter", Arial, sans-serif;
+    background: var(--background-light);
+    color: #333;
+    margin: 0;
+    padding: 0;
+}
+
+/* ---------- HEADER ---------- */
+
+header {
+    background: var(--primary-color);
+    color: white;
+    padding: 25px 0;
+    text-align: center;
+    box-shadow: 0 4px 15px var(--shadow-strong);
+    margin-bottom: 35px;
+}
+
+header h1 {
+    margin: 0;
+    font-size: 1.9rem;
+    letter-spacing: 1px;
+}
+
+/* ---------- MAIN LAYOUT ---------- */
+
+main {
+    max-width: 980px;
+    width: 100%;
+    margin: auto;
+    padding: 0 20px;
+}
+
+/* ---------- SECTIONS / CARDS ---------- */
+
+section {
+    background: var(--card-background);
+    padding: 25px;
+    border-radius: var(--radius);
+    margin-bottom: 30px;
+    box-shadow: 0 4px 18px var(--shadow-light);
+    transition: transform var(--transition), box-shadow var(--transition);
+}
+
+section:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 24px var(--shadow-light);
+}
+
+/* ---------- FORMS ---------- */
+
+input, textarea, button {
+    width: 100%;
+    padding: 12px 14px;
+    font-size: 1rem;
+    margin-bottom: 15px;
+    border-radius: var(--radius);
+}
+
+input, textarea {
+    border: 1px solid var(--border-color);
+    background: #fafafa;
+    transition: border var(--transition), box-shadow var(--transition);
+}
+
+input:focus, textarea:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 4px rgba(0, 102, 255, 0.4);
+    outline: none;
+}
+
+button {
+    border: none;
+    background: var(--primary-color);
+    color: white;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background var(--transition), transform var(--transition);
+}
+
+button:hover {
+    background: var(--primary-dark);
+    transform: translateY(-2px);
+}
+
+/* Botão de logout */
+#logoutButton {
+    width: auto;
+    background: var(--secondary-color);
+}
+
+#logoutButton:hover {
+    background: #565e64;
+}
+
+/* ---------- NEWS LIST ---------- */
+
+.news-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.news-item {
+    background: #fff;
+    border-radius: var(--radius);
+    padding: 16px 20px;
+    box-shadow: 0 2px 8px var(--shadow-light);
+    transition: var(--transition);
+}
+
+.news-item:hover {
+    transform: translateX(4px);
+    box-shadow: 0 4px 14px var(--shadow-light);
+}
+
+.news-item h3 {
+    margin: 0;
+    color: var(--primary-dark);
+}
+
+.news-item small {
+    display: block;
+    color: var(--secondary-color);
+    margin-top: 6px;
+}
+
+/* ---------- TAG DE ROLE ---------- */
+
+.role-tag {
+    background: var(--primary-color);
+    color: white;
+    font-size: 0.8rem;
+    padding: 2px 8px;
+    border-radius: var(--radius);
+    margin-left: 6px;
+}
+
+/* ---------- MENSAGENS ---------- */
+
+.error {
+    color: #d62828;
+    font-weight: bold;
+}
+
+.success {
+    color: #2b9348;
+    font-weight: bold;
+}
+
+/* ---------- ANIMAÇÕES ---------- */
+
+.fade-in {
+    animation: fadeIn 0.4s ease forwards;
+    opacity: 0;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* ---------- RESPONSIVIDADE ---------- */
+
+@media (max-width: 600px) {
+    header h1 {
+        font-size: 1.5rem;
+    }
+
+    section {
+        padding: 18px;
+    }
+}

@@ -12,17 +12,17 @@ public class ComentarioRepositoryImpl implements IComentarioRepository, PanacheR
     
     @Override
     public void persist(ComentarioModel comentario) {
-        PanacheRepository.super.persist(comentario);
+        persist(comentario);
     }
 
     @Override
     public void delete(ComentarioModel comentario) {
-        PanacheRepository.super.delete(comentario);
+        delete(comentario);
     }
 
     @Override
     public Optional<ComentarioModel> buscarPorId(Long id) {
-        return PanacheRepository.super.findByIdOptional(id);
+        return findByIdOptional(id);
     }
 
     @Override

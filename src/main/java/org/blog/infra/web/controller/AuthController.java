@@ -1,8 +1,7 @@
 package org.blog.infra.web.controller;
 
 import io.quarkus.security.identity.SecurityIdentity;
-import jakarta.annotation.security.PermitAll;
-import jakarta.annotation.security.RolesAllowed;
+import jakarta.annotation.security.RolesAllowed; // Use RolesAllowed para forçar a autenticação
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.POST;
@@ -10,7 +9,6 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-import org.blog.core.dto.LoginDTO; // DTO de entrada (email e senha)
 import org.blog.core.dto.UsuarioDTO;
 import org.blog.core.service.IUsuarioService;
 
@@ -20,33 +18,37 @@ import org.blog.core.service.IUsuarioService;
 public class AuthController {
 
     @Inject
-    SecurityIdentity securityIdentity; 
-    
+    SecurityIdentity securityIdentity;
+
     @Inject
     IUsuarioService usuarioService;
 
+    // Este endpoint apenas verifica se o Basic Auth foi bem-sucedido.
+    // O Quarkus/JAX-RS forçará a autenticação antes de entrar neste método.
     @POST
     @Path("/login")
-    @PermitAll // Permite acesso público para iniciar o processo de autenticação
-    public Response login(LoginDTO loginDTO) {
-        String email = loginDTO.getEmail();
-
-        if (securityIdentity.isAnonymous()) {
-            return Response.status(Response.Status.UNAUTHORIZED).entity("Falha na autenticação ou credenciais inválidas.").build();
-        }
+    @RolesAllowed({"ADMIN", "EDITOR", "LEITOR"}) // Força que um usuário autenticado (com qualquer papel) chegue aqui
+    public Response login() {
+        // Se chegamos aqui, o BlogIdentityProvider já autenticou o usuário
+        String email = securityIdentity.getPrincipal().getName();
 
         java.util.Optional<UsuarioDTO> userDTO = usuarioService.buscarDTOPorEmail(email);
 
         if (userDTO.isPresent()) {
+            // Retorna os dados do usuário logado (exemplo de token ou dados de sessão)
             return Response.ok(userDTO.get()).build();
         }
 
+        // Isso é um fallback, pois o 401 deve ser gerado antes pelo Quarkus se falhar
         return Response.status(Response.Status.UNAUTHORIZED).build();
     }
 
     @POST
     @Path("/logout")
     @RolesAllowed({"ADMIN", "EDITOR", "LEITOR"})
+    // O logout em Basic Auth é geralmente tratado pelo cliente, que simplesmente
+    // para de enviar o cabeçalho Authorization. Este endpoint pode ser mantido
+    // para fins de compatibilidade ou para limpar uma sessão se você usar cookies.
     public Response logout() {
         return Response.status(Response.Status.NO_CONTENT).build();
     }

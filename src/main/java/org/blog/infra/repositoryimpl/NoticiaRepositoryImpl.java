@@ -7,27 +7,27 @@ import jakarta.enterprise.context.ApplicationScoped;
 import java.util.List;
 import java.util.Optional;
 
-@ApplicationScoped // Torna esta classe injetável (RESOLVE O CDI)
+@ApplicationScoped
 public class NoticiaRepositoryImpl implements INoticiaRepository, PanacheRepository<NoticiaModel> {
 
     @Override
     public void persist(NoticiaModel noticia) {
-        PanacheRepository.super.persist(noticia);
+       PanacheRepository.super.persist(noticia);
     }
 
     @Override
     public void delete(NoticiaModel noticia) {
-        PanacheRepository.super.delete(noticia);
+       PanacheRepository.super.delete(noticia);
     }
 
     @Override
     public Optional<NoticiaModel> buscarPorId(Long id) {
-        return PanacheRepository.super.findByIdOptional(id); // Usa o método Optional do Panache
+        return findByIdOptional(id);
     }
 
     @Override
     public List<NoticiaModel> listarAll() {
 
-        return PanacheRepository.super.listAll();
+        return listAll();
     }
 }
