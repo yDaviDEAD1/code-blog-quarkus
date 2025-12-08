@@ -22,14 +22,10 @@ public class NoticiaDTO {
     private String conteudo;
     private LocalDateTime dataPublicacao;
 
-    // Relações: Usamos DTOs, nunca a Entidade JPA
     private UsuarioDTO autor;
-    private List<ComentarioDTO> comentarios; // (Assumindo que você criou o ComentarioDTO)
+    private List<ComentarioDTO> comentarios;
 
-    /**
-     * Mapeador manual (Mapper de Camada):
-     * Converte a Entidade JPA (NoticiaModel da INFRA) para o DTO (seguro do CORE).
-     */
+
     public static NoticiaDTO from(NoticiaModel model) {
         List<ComentarioDTO> comentarioDTOs = model.getComentarios() != null
                 ? model.getComentarios().stream()

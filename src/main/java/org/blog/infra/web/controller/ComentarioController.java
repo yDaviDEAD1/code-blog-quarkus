@@ -36,7 +36,6 @@ public class ComentarioController {
             @PathParam("noticiaId") Long noticiaId,
             ComentarioDTO comentarioDTO) {
         
-        // Obter o email do usuário autenticado
         String autorEmail = securityIdentity.getPrincipal().getName();
         
         ComentarioDTO created = comentarioService.create(noticiaId, comentarioDTO, autorEmail);
@@ -45,7 +44,7 @@ public class ComentarioController {
 
     @DELETE
     @Path("/{comentarioId}")
-    @RolesAllowed({"ADMIN", "EDITOR", "LEITOR"}) // Permite que todos tentem, mas o SERVICE fará a checagem fina.
+    @RolesAllowed({"ADMIN", "EDITOR", "LEITOR"})
     public Response delete(@PathParam("comentarioId") Long comentarioId) {
 
         comentarioService.delete(comentarioId);

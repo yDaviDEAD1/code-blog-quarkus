@@ -1,4 +1,4 @@
-// script.js (VERSÃO FINAL COM ADMIN E UI)
+// script.js (VERSÃO FINAL E CORRIGIDA COM TOASTS E MODAL)
 
 const API_BASE_URL = 'http://localhost:8080';
 let currentUser = null;
@@ -30,6 +30,12 @@ const registerContainer = document.getElementById('register-view-container');
 const userListDiv = document.getElementById('user-list');
 const adminStatusDiv = document.getElementById('admin-status');
 
+// 💡 NOVAS Variáveis DOM para o Modal
+const confirmationModal = document.getElementById('confirmation-modal');
+const confirmDeleteBtn = document.getElementById('confirm-delete');
+const cancelDeleteBtn = document.getElementById('cancel-delete');
+let currentNoticiaIdToDelete = null; // Variável global para armazenar o ID
+
 
 // ----------------------------------------------------------------
 // 1. UTILIDADES DE AUTENTICAÇÃO E UI
@@ -37,6 +43,33 @@ const adminStatusDiv = document.getElementById('admin-status');
 
 function getAuthHeader() {
     return localStorage.getItem('authHeader');
+}
+
+/**
+ * Exibe uma mensagem flutuante (Toast) na tela.
+ */
+function showToast(message, type = 'success') {
+    const container = document.getElementById('toast-container');
+    if (!container) return;
+
+    const toast = document.createElement('div');
+    toast.className = `custom-toast toast-${type}`;
+    toast.textContent = message;
+
+    container.appendChild(toast);
+
+    // 1. Mostrar o toast
+    setTimeout(() => {
+        toast.classList.add('toast-show');
+    }, 10);
+
+    // 2. Esconder e remover após 4 segundos
+    setTimeout(() => {
+        toast.classList.remove('toast-show');
+        setTimeout(() => {
+            container.removeChild(toast);
+        }, 300); // Tempo da transição CSS
+    }, 4000);
 }
 
 /**
@@ -230,9 +263,62 @@ async function handlePost(e) {
     }
 }
 
-async function handleCommentSubmission(e) {
-    e.preventDefault();
-    const form = e.target;
+/**
+ * Função que inicia o processo de exclusão (Abre o Modal).
+ */
+function handleDeleteNews(noticiaId) {
+    if (!confirmationModal) return;
+
+    // Remove o confirm() nativo, abre o modal customizado
+    currentNoticiaIdToDelete = noticiaId; // Armazena o ID
+    confirmationModal.style.display = 'flex'; // Mostra o modal
+}
+
+/**
+ * Função de exclusão (chamada APENAS após a confirmação no modal).
+ */
+async function executeDelete(noticiaId) {
+    const authHeader = getAuthHeader();
+    const newsItemDiv = document.querySelector(`.news-item[data-noticia-id="${noticiaId}"]`);
+
+    // Esconder o modal antes de tentar excluir
+    if (confirmationModal) confirmationModal.style.display = 'none';
+
+    if (!authHeader) {
+        showToast('Você não está autenticado para esta ação.', 'error');
+        return;
+    }
+
+    if (newsItemDiv) newsItemDiv.style.opacity = '0.5';
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/noticias/${noticiaId}`, {
+            method: 'DELETE',
+            headers: { 'Authorization': authHeader }
+        });
+
+        if (response.status === 204) {
+            showToast('Notícia excluída com sucesso!', 'success');
+            loadNews();
+        } else if (response.status === 403) {
+            showToast('Permissão negada. Apenas Administradores podem excluir.', 'error');
+            if (newsItemDiv) newsItemDiv.style.opacity = '1';
+        } else {
+            showToast(`Falha ao excluir. Status: ${response.status}`, 'error');
+            if (newsItemDiv) newsItemDiv.style.opacity = '1';
+        }
+    } catch (error) {
+        showToast('Erro de rede ao excluir notícia.', 'error');
+        if (newsItemDiv) newsItemDiv.style.opacity = '1';
+    }
+}
+
+/**
+ * Lida com a submissão de um novo comentário (chamada via onclick).
+ */
+async function handleCommentSubmission(event) {
+    event.preventDefault();
+    const form = event.currentTarget.closest('.comment-form');
     const authHeader = getAuthHeader();
 
     if (!authHeader) {
@@ -243,6 +329,7 @@ async function handleCommentSubmission(e) {
     const noticiaId = form.getAttribute('data-noticia-id');
     const commentStatus = form.querySelector('.comment-status');
     const textArea = form.querySelector('textarea');
+
     commentStatus.textContent = 'Enviando...';
     const comentarioData = { texto: textArea.value };
 
@@ -268,10 +355,12 @@ async function handleCommentSubmission(e) {
     }
 }
 
+
 async function loadNews() {
     if (!newsListDiv) return;
 
     newsListDiv.innerHTML = '<p>Carregando notícias...</p>';
+    const userRole = localStorage.getItem('userRole');
 
     try {
         const response = await fetch(`${API_BASE_URL}/noticias`);
@@ -300,8 +389,20 @@ async function loadNews() {
                 `).join('')
                 : '<p style="font-size: 0.9em;">Nenhum comentário ainda.</p>';
 
+            let deleteButtonHtml = '';
+            if (userRole === 'ADMIN') {
+                deleteButtonHtml = `
+                    <div class="news-actions-top">
+                        <button class="delete-news-btn" onclick="handleDeleteNews(${noticia.id})">
+                            Excluir
+                        </button>
+                    </div>
+                `;
+            }
+
             htmlContent += `
                 <div class="news-item fade-in" data-noticia-id="${noticia.id}">
+                    ${deleteButtonHtml} 
                     <h3>${noticia.titulo}</h3>
                     <p>${noticia.conteudo.substring(0, 200)}...</p>
                     <small>Por: ${noticia.autor.nome} em ${data}</small>
@@ -314,7 +415,7 @@ async function loadNews() {
                         
                         <form class="comment-form" data-noticia-id="${noticia.id}">
                             <textarea placeholder="Adicione um comentário..." required class="comment-input"></textarea>
-                            <button type="submit" class="comment-button">Comentar</button>
+                            <button type="submit" class="comment-button" onclick="handleCommentSubmission(event)">Comentar</button>
                             <p class="comment-status error" id="comment-status-${noticia.id}"></p>
                         </form>
                     </div>
@@ -324,19 +425,10 @@ async function loadNews() {
 
         newsListDiv.innerHTML = htmlContent;
 
-        attachCommentListeners();
-
     } catch (error) {
         console.error("Erro ao carregar notícias:", error);
         newsListDiv.innerHTML = `<p class="error">Erro ao carregar notícias: ${error.message}</p>`;
     }
-}
-
-function attachCommentListeners() {
-    document.querySelectorAll('.comment-form').forEach(form => {
-        form.removeEventListener('submit', handleCommentSubmission);
-        form.addEventListener('submit', handleCommentSubmission);
-    });
 }
 
 
@@ -344,10 +436,6 @@ function attachCommentListeners() {
 // ADMIN FEATURES
 // ----------------------------------------------------------------
 
-/**
- * Busca e renderiza a lista de usuários para o Admin.
- * Esta função só é executada na página /admin.
- */
 async function loadUsersForAdmin() {
     if (!userListDiv) return;
 
@@ -377,9 +465,6 @@ async function loadUsersForAdmin() {
     }
 }
 
-/**
- * Renderiza a lista de usuários com dropdowns de role.
- */
 function renderUserList(users) {
     const userListDiv = document.getElementById('user-list');
     const availableRoles = ['LEITOR', 'EDITOR', 'ADMIN'];
@@ -408,9 +493,6 @@ function renderUserList(users) {
     userListDiv.innerHTML = html;
 }
 
-/**
- * Envia a requisição PUT para mudar a role do usuário.
- */
 async function changeUserRole(userId, newRole) {
     const authHeader = getAuthHeader();
     const adminStatusDiv = document.getElementById('admin-status');
@@ -429,7 +511,7 @@ async function changeUserRole(userId, newRole) {
         if (response.status === 204 || response.status === 200) {
             adminStatusDiv.className = 'success';
             adminStatusDiv.textContent = `Role de ${userId} alterada para ${newRole} com sucesso!`;
-            loadUsersForAdmin(); // Recarrega a lista
+            loadUsersForAdmin();
         } else {
             adminStatusDiv.className = 'error';
             adminStatusDiv.textContent = `Falha (${response.status}): Role não alterada.`;
@@ -447,6 +529,22 @@ async function changeUserRole(userId, newRole) {
 // ----------------------------------------------------------------
 
 document.addEventListener('DOMContentLoaded', () => {
+
+    // --- LISTENERS DO MODAL DE CONFIRMAÇÃO ---
+    if (confirmDeleteBtn) {
+        confirmDeleteBtn.addEventListener('click', () => {
+            if (currentNoticiaIdToDelete !== null) {
+                executeDelete(currentNoticiaIdToDelete); // Executa a exclusão
+                currentNoticiaIdToDelete = null; // Reseta o ID
+            }
+        });
+    }
+
+    if (cancelDeleteBtn) {
+        cancelDeleteBtn.addEventListener('click', () => {
+            if (confirmationModal) confirmationModal.style.display = 'none'; // Esconde o modal
+        });
+    }
 
     // --- LÓGICA DE EVENTOS (APENAS NA PÁGINA DE AUTENTICAÇÃO: /auth) ---
     if (loginForm) loginForm.addEventListener('submit', handleLogin);
@@ -488,15 +586,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Chamadas de carregamento baseadas na página
     if (isUserAdminPage) {
-        // Se estiver na página /admin, carregue os usuários (se for ADMIN)
         if (storedRole === 'ADMIN') {
             loadUsersForAdmin();
         } else {
-            // Se não for ADMIN (ou não estiver logado), mostra erro
             if (userListDiv) userListDiv.innerHTML = '<p class="error">Acesso negado. Por favor, faça login como Administrador.</p>';
         }
     } else {
-        // Se estiver na Home, carregue notícias
         loadNews();
     }
 });

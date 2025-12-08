@@ -35,7 +35,6 @@ public class BlogIdentityProvider implements IdentityProvider<UsernamePasswordAu
         String plainPassword = new String(passwordArray);
         Arrays.fill(passwordArray, ' ');
 
-        // 💡 1. Mude o contexto de execução para o Worker Thread ANTES de chamar o código bloqueante
         return Uni.createFrom().item(() -> {
 
                     Optional<UsuarioModel> userOptional = usuarioService.buscarModelPorEmail(email);
@@ -47,8 +46,6 @@ public class BlogIdentityProvider implements IdentityProvider<UsernamePasswordAu
                     UsuarioModel user = userOptional.get();
                     if (usuarioService.checkPassword(plainPassword, user.getSenha())) {
 
-                        // 💡 AQUI: Crie e retorne a SecurityIdentity (que é o tipo pai)
-                        // O compilador deve conseguir inferir que este é o tipo correto.
                         return (SecurityIdentity) QuarkusSecurityIdentity.builder()
                                 .setPrincipal(user::getEmail)
                                 .addRoles(Set.of(user.getPapel()))
@@ -56,7 +53,6 @@ public class BlogIdentityProvider implements IdentityProvider<UsernamePasswordAu
                     }
                     return null;
                 })
-                // Força a execução no Worker Pool para evitar o erro de bloqueio
                 .runSubscriptionOn(Infrastructure.getDefaultWorkerPool());
     }
     }

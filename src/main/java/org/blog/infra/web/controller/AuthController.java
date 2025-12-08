@@ -63,9 +63,6 @@ public class AuthController {
     @POST
     @Path("/logout")
     @RolesAllowed({"ADMIN", "EDITOR", "LEITOR"})
-    // O logout em Basic Auth é geralmente tratado pelo cliente, que simplesmente
-    // para de enviar o cabeçalho Authorization. Este endpoint pode ser mantido
-    // para fins de compatibilidade ou para limpar uma sessão se você usar cookies.
     public Response logout() {
         return Response.status(Response.Status.NO_CONTENT).build();
     }

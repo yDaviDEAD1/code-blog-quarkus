@@ -9,9 +9,7 @@ public interface IComentarioRepository {
     void persist(ComentarioModel comentario);
     void delete(ComentarioModel comentario);
     
-    // Método para buscar um comentário específico (para edição/deleção)
     Optional<ComentarioModel> buscarPorId(Long id);
 
-    // Método para listar todos os comentários de uma notícia específica
     List<ComentarioModel> listByNoticiaId(Long noticiaId);
 }

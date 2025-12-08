@@ -221,6 +221,7 @@ button:hover {
     transition: var(--transition);
     border-left: 5px solid var(--primary-color);
     opacity: 0;
+    position: relative; /* Necessário para posicionar o botão DELETE */
 }
 
 .news-item:hover {
@@ -245,6 +246,34 @@ button:hover {
     padding-top: 5px;
     border-top: 1px solid var(--border-color);
 }
+
+/* Botão de Excluir Notícia (ADMIN) */
+.news-actions-top {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    z-index: 10;
+}
+
+.delete-news-btn {
+    width: auto;
+    padding: 6px 12px;
+    background: #dc3545; /* Vermelho */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 0.85rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.2s ease;
+    margin-bottom: 0;
+}
+
+.delete-news-btn:hover {
+    background: #c82333;
+    transform: none;
+}
+
 
 /* ---------- COMENTÁRIOS ---------- */
 
@@ -384,6 +413,111 @@ a:hover {
 #admin-status.error {
     background: #ffe6e6;
     color: #d62828;
+}
+
+
+/* ---------- TOAST MESSAGES (FLUTUANTES) ---------- */
+
+#toast-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.custom-toast {
+    padding: 15px 25px;
+    border-radius: 8px;
+    font-weight: bold;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    opacity: 0;
+    transform: translateY(-20px);
+    transition: opacity 0.3s ease-out, transform 0.3s ease-out;
+}
+
+.toast-success {
+    background-color: #4CAF50;
+    color: white;
+}
+
+.toast-error {
+    background-color: #f44336;
+    color: white;
+}
+
+.toast-show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+
+/* ---------- MODAL DE CONFIRMAÇÃO (CUSTOMIZADO) ---------- */
+
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1001;
+}
+
+.modal-content {
+    background-color: var(--card-background);
+    padding: 30px;
+    border-radius: var(--radius);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+    max-width: 400px;
+    width: 90%;
+    text-align: center;
+    animation: fadeInModal 0.3s ease-out;
+}
+
+.modal-content h3 {
+    color: var(--primary-dark);
+    margin-top: 0;
+}
+
+.modal-actions {
+    margin-top: 25px;
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.modal-btn {
+    width: 48%;
+    padding: 10px 15px;
+    font-weight: bold;
+    border-radius: 5px;
+}
+
+.modal-cancel {
+    background-color: var(--secondary-color);
+}
+.modal-cancel:hover {
+    background-color: #5a6268;
+    transform: none;
+}
+
+.modal-delete {
+    background-color: #dc3545;
+}
+.modal-delete:hover {
+    background-color: #c82333;
+    transform: none;
+}
+
+@keyframes fadeInModal {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
 
