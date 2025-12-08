@@ -34,7 +34,7 @@ header {
     box-shadow: 0 4px 15px var(--shadow-strong);
     margin-bottom: 35px;
     width: 100%;
-    position: relative; /* Para posicionar o botão do header */
+    position: relative;
 }
 
 header h1 {
@@ -118,9 +118,11 @@ button:hover {
 
 #auth-button-container {
     position: absolute;
-    top: 50%; /* Centraliza verticalmente no header */
+    top: 50%;
     right: 20px;
     transform: translateY(-50%);
+    display: flex;
+    gap: 10px;
 }
 
 .header-button {
@@ -180,7 +182,7 @@ button:hover {
     flex-wrap: wrap;
     gap: 10px;
     padding: 10px 0;
-    opacity: 0; /* Controlado por JS/fade-in */
+    opacity: 0;
 }
 
 #logged-in-view p {
@@ -218,7 +220,7 @@ button:hover {
     box-shadow: 0 4px 15px var(--shadow-light);
     transition: var(--transition);
     border-left: 5px solid var(--primary-color);
-    opacity: 0; /* Controlado por JS/fade-in */
+    opacity: 0;
 }
 
 .news-item:hover {
@@ -300,6 +302,91 @@ a:hover {
     color: var(--primary-dark);
 }
 
+/* ---------- ADMIN / GERENCIAMENTO DE USUÁRIOS ---------- */
+
+.user-management-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    padding-top: 10px;
+}
+
+.user-item {
+    background: #fff;
+    border-radius: var(--radius);
+    padding: 15px 25px;
+    box-shadow: 0 2px 8px var(--shadow-light);
+    border-left: 5px solid var(--primary-dark);
+
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.user-info {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.user-info strong {
+    font-size: 1.1em;
+    color: var(--primary-dark);
+}
+
+.user-info span {
+    font-size: 0.9em;
+    color: var(--secondary-color);
+}
+
+.user-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 300px;
+}
+
+.role-selector {
+    padding: 8px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    background: var(--background-light);
+    width: auto;
+    font-size: 0.95rem;
+    margin-bottom: 0;
+}
+
+.user-item button {
+    width: auto;
+    padding: 8px 15px;
+    font-size: 0.9rem;
+    background: #28a745;
+    transition: background var(--transition);
+    margin-bottom: 0;
+}
+
+.user-item button:hover {
+    background: #1e7e34;
+    transform: translateY(-1px);
+}
+
+#admin-status {
+    padding: 15px;
+    border-radius: 8px;
+    text-align: center;
+    margin-top: 20px;
+}
+#admin-status.success {
+    background: #e6ffed;
+    color: #2b9348;
+}
+#admin-status.error {
+    background: #ffe6e6;
+    color: #d62828;
+}
+
+
 /* ---------- MENSAGENS E ANIMAÇÕES ---------- */
 
 .error {
@@ -335,9 +422,18 @@ a:hover {
     }
 
     #auth-button-container {
-        /* Move o botão para baixo na tela pequena para não colidir com o título */
         top: 90px;
         transform: translateY(0);
         right: 10px;
+    }
+
+    .user-item {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    .user-actions {
+        margin-top: 10px;
+        min-width: 100%;
+        justify-content: space-between;
     }
 }

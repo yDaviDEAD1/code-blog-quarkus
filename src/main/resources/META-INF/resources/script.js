@@ -1,4 +1,4 @@
-// script.js
+// script.js (VERSÃO FINAL COM ADMIN E UI)
 
 const API_BASE_URL = 'http://localhost:8080';
 let currentUser = null;
@@ -10,11 +10,10 @@ const authButtonContainer = document.getElementById('auth-button-container');
 const postForm = document.getElementById('postForm');
 const newsListDiv = document.getElementById('news-list');
 const postCreationSection = document.getElementById('post-creation-section');
-const postStatus = document.getElementById('post-status'); // Pode ser null na página auth
+const postStatus = document.getElementById('post-status');
 
 // Elementos de Status/View (Comuns)
 const loggedInView = document.getElementById('logged-in-view');
-const loggedOutView = document.getElementById('logged-out-view');
 const usernameDisplay = document.getElementById('username-display');
 const roleDisplay = document.getElementById('role-display');
 
@@ -26,7 +25,10 @@ const showLoginBtn = document.getElementById('showLogin');
 const showRegisterBtn = document.getElementById('showRegister');
 const loginContainer = document.getElementById('login-view-container');
 const registerContainer = document.getElementById('register-view-container');
-const authToggleDiv = document.querySelector('.auth-toggle');
+
+// Elementos da Página Admin (admin.html)
+const userListDiv = document.getElementById('user-list');
+const adminStatusDiv = document.getElementById('admin-status');
 
 
 // ----------------------------------------------------------------
@@ -38,30 +40,38 @@ function getAuthHeader() {
 }
 
 /**
- * Define o estado da interface E gerencia o botão do header.
+ * Define o estado da interface E gerencia o botão do header (Login/Sair/Admin).
  */
 function updateUI(user = null) {
     currentUser = user;
     const isHomePage = window.location.pathname === '/' || window.location.pathname === '/index.html';
+    const userRole = user ? user.role : null;
 
     if (user) {
         // --- ESTADO LOGADO ---
+        let headerButtons = '';
 
-        // Configura o cabeçalho/botão de SAIR no HEADER
+        // Link Admin (Apenas para ADMIN)
+        if (userRole === 'ADMIN') {
+            headerButtons += `<a href="/admin" class="header-button" style="margin-right: 10px;">Admin</a>`;
+        }
+
+        // Botão Sair (Logout)
+        headerButtons += `<button id="headerLogoutButton" class="header-button">Sair</button>`;
         if (authButtonContainer) {
-            authButtonContainer.innerHTML = `<button id="headerLogoutButton" class="header-button">Sair</button>`;
+            authButtonContainer.innerHTML = headerButtons;
             document.getElementById('headerLogoutButton').addEventListener('click', handleLogout);
         }
 
         if (isHomePage) {
             // Configura o status de bem-vindo na Home
-            usernameDisplay.textContent = user.nome;
-            roleDisplay.textContent = user.role;
+            if (usernameDisplay) usernameDisplay.textContent = user.nome;
+            if (roleDisplay) roleDisplay.textContent = userRole;
 
             if (loggedInView) loggedInView.style.display = 'flex';
 
             // Exibir a seção de postagem apenas para ADMIN ou EDITOR
-            if (user.role === 'ADMIN' || user.role === 'EDITOR') {
+            if (userRole === 'ADMIN' || userRole === 'EDITOR') {
                 if (postCreationSection) {
                     postCreationSection.style.display = 'block';
                     postCreationSection.classList.add('fade-in');
@@ -93,25 +103,17 @@ function updateUI(user = null) {
 
 
 // ----------------------------------------------------------------
-// 2. FUNÇÕES DE API (AUTH, CRUD)
+// 2. FUNÇÕES DE API (AUTH, CRUD, ADMIN)
 // ----------------------------------------------------------------
 
-/**
- * Lida com o processo de Logout.
- */
 function handleLogout() {
     updateUI(null);
-    // Redireciona para a home após sair (se estiver em qualquer outra página)
     if (window.location.pathname !== '/') {
         window.location.href = '/';
     }
-    // Recarrega notícias na Home (se estiver na Home)
     if (typeof loadNews === 'function') loadNews();
 }
 
-/**
- * Realiza o Login. (Apenas em login1.html)
- */
 async function handleLogin(e) {
     e.preventDefault();
     if (!loginForm) return;
@@ -139,7 +141,6 @@ async function handleLogin(e) {
 
             statusDiv.textContent = 'Login bem-sucedido. Redirecionando...';
 
-            // 💡 REDIRECIONAR PARA A HOME
             setTimeout(() => {
                 window.location.href = '/';
             }, 500);
@@ -152,9 +153,6 @@ async function handleLogin(e) {
     }
 }
 
-/**
- * Lida com o registro de um novo usuário (LEITOR). (Apenas em login1.html)
- */
 async function handleRegister(e) {
     e.preventDefault();
     if (!registerForm) return;
@@ -183,7 +181,6 @@ async function handleRegister(e) {
             registerStatus.textContent = 'Registro bem-sucedido! Vá para o Login.';
             registerForm.reset();
 
-            // Muda para o formulário de Login após sucesso
             setTimeout(() => {
                 if (showLoginBtn) showLoginBtn.click();
             }, 1000);
@@ -198,16 +195,11 @@ async function handleRegister(e) {
     }
 }
 
-
-/**
- * Envia uma nova notícia. (Apenas na Home)
- */
 async function handlePost(e) {
     e.preventDefault();
     if (!postForm) return;
     const authHeader = getAuthHeader();
 
-    // ... (restante da lógica handlePost) ...
     postStatus.textContent = 'Publicando...';
     const titulo = postForm.querySelector('#post-title').value;
     const conteudo = postForm.querySelector('#post-content').value;
@@ -238,9 +230,6 @@ async function handlePost(e) {
     }
 }
 
-/**
- * Lida com a submissão de um novo comentário. (Apenas na Home)
- */
 async function handleCommentSubmission(e) {
     e.preventDefault();
     const form = e.target;
@@ -251,7 +240,6 @@ async function handleCommentSubmission(e) {
         return;
     }
 
-    // ... (restante da lógica handleCommentSubmission) ...
     const noticiaId = form.getAttribute('data-noticia-id');
     const commentStatus = form.querySelector('.comment-status');
     const textArea = form.querySelector('textarea');
@@ -280,19 +268,14 @@ async function handleCommentSubmission(e) {
     }
 }
 
-
-/**
- * Carrega e exibe a lista de notícias. (Apenas na Home)
- */
 async function loadNews() {
-    if (!newsListDiv) return; // Não executa se não estiver na Home
+    if (!newsListDiv) return;
 
     newsListDiv.innerHTML = '<p>Carregando notícias...</p>';
 
     try {
         const response = await fetch(`${API_BASE_URL}/noticias`);
 
-        // ... (restante da lógica loadNews - renderização) ...
         if (!response.ok) {
             throw new Error(`Falha ao carregar notícias: ${response.statusText}`);
         }
@@ -349,14 +332,113 @@ async function loadNews() {
     }
 }
 
-/**
- * Anexa listeners de submissão aos formulários de comentários. (Apenas na Home)
- */
 function attachCommentListeners() {
     document.querySelectorAll('.comment-form').forEach(form => {
         form.removeEventListener('submit', handleCommentSubmission);
         form.addEventListener('submit', handleCommentSubmission);
     });
+}
+
+
+// ----------------------------------------------------------------
+// ADMIN FEATURES
+// ----------------------------------------------------------------
+
+/**
+ * Busca e renderiza a lista de usuários para o Admin.
+ * Esta função só é executada na página /admin.
+ */
+async function loadUsersForAdmin() {
+    if (!userListDiv) return;
+
+    userListDiv.innerHTML = '<p>Buscando usuários...</p>';
+    const authHeader = getAuthHeader();
+
+    if (!authHeader) {
+        userListDiv.innerHTML = '<p class="error">Acesso negado. Credenciais ausentes.</p>';
+        return;
+    }
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/admin/usuarios`, {
+            headers: { 'Authorization': authHeader }
+        });
+
+        if (response.status === 403) {
+            userListDiv.innerHTML = '<p class="error">Permissão negada. Apenas ADMIN pode acessar.</p>';
+            return;
+        }
+
+        const users = await response.json();
+        renderUserList(users);
+
+    } catch (error) {
+        if(adminStatusDiv) adminStatusDiv.textContent = 'Erro de rede ao carregar usuários.';
+    }
+}
+
+/**
+ * Renderiza a lista de usuários com dropdowns de role.
+ */
+function renderUserList(users) {
+    const userListDiv = document.getElementById('user-list');
+    const availableRoles = ['LEITOR', 'EDITOR', 'ADMIN'];
+
+    let html = users.map(user => `
+        <div class="user-item">
+            <div class="user-info">
+                <strong>${user.nome}</strong> 
+                <span>(${user.email})</span>
+            </div>
+            
+            <div class="user-actions">
+                Role Atual: <span class="role-tag">${user.role}</span>
+                
+                <select id="role-selector-${user.id}" data-user-id="${user.id}" class="role-selector">
+                    ${availableRoles.map(role => `
+                        <option value="${role}" ${user.role === role ? 'selected' : ''}>${role}</option>
+                    `).join('')}
+                </select>
+                
+                <button onclick="changeUserRole(${user.id}, document.getElementById('role-selector-${user.id}').value)">Salvar Role</button>
+            </div>
+        </div>
+    `).join('');
+
+    userListDiv.innerHTML = html;
+}
+
+/**
+ * Envia a requisição PUT para mudar a role do usuário.
+ */
+async function changeUserRole(userId, newRole) {
+    const authHeader = getAuthHeader();
+    const adminStatusDiv = document.getElementById('admin-status');
+    adminStatusDiv.textContent = `Alterando role de ${userId} para ${newRole}...`;
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/admin/usuarios/${userId}/role`, {
+            method: 'PUT',
+            headers: {
+                'Authorization': authHeader,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ role: newRole })
+        });
+
+        if (response.status === 204 || response.status === 200) {
+            adminStatusDiv.className = 'success';
+            adminStatusDiv.textContent = `Role de ${userId} alterada para ${newRole} com sucesso!`;
+            loadUsersForAdmin(); // Recarrega a lista
+        } else {
+            adminStatusDiv.className = 'error';
+            adminStatusDiv.textContent = `Falha (${response.status}): Role não alterada.`;
+        }
+
+    } catch (error) {
+        adminStatusDiv.className = 'error';
+        adminStatusDiv.textContent = 'Erro de rede ao alterar role.';
+    }
 }
 
 
@@ -375,13 +457,13 @@ document.addEventListener('DOMContentLoaded', () => {
         showLoginBtn.addEventListener('click', () => {
             loginContainer.style.display = 'block';
             registerContainer.style.display = 'none';
-            document.getElementById('register-status').textContent = '';
+            if (document.getElementById('register-status')) document.getElementById('register-status').textContent = '';
         });
 
         showRegisterBtn.addEventListener('click', () => {
             loginContainer.style.display = 'none';
             registerContainer.style.display = 'block';
-            document.getElementById('auth-status').textContent = '';
+            if (document.getElementById('auth-status')) document.getElementById('auth-status').textContent = '';
         });
         // Exibir o login por padrão na página de Auth
         if (loginContainer) loginContainer.style.display = 'block';
@@ -394,6 +476,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- INICIALIZAÇÃO GLOBAL ---
     const storedRole = localStorage.getItem('userRole');
     const storedNome = localStorage.getItem('userNome');
+    const isUserAdminPage = window.location.pathname === '/admin' || window.location.pathname === '/admin/';
+
 
     if (storedRole && storedNome) {
         const user = { role: storedRole, nome: storedNome };
@@ -402,6 +486,17 @@ document.addEventListener('DOMContentLoaded', () => {
         updateUI(null);
     }
 
-    // Carrega a lista de notícias (executado apenas se newsListDiv existir)
-    loadNews();
+    // Chamadas de carregamento baseadas na página
+    if (isUserAdminPage) {
+        // Se estiver na página /admin, carregue os usuários (se for ADMIN)
+        if (storedRole === 'ADMIN') {
+            loadUsersForAdmin();
+        } else {
+            // Se não for ADMIN (ou não estiver logado), mostra erro
+            if (userListDiv) userListDiv.innerHTML = '<p class="error">Acesso negado. Por favor, faça login como Administrador.</p>';
+        }
+    } else {
+        // Se estiver na Home, carregue notícias
+        loadNews();
+    }
 });

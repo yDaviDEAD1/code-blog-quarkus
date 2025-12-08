@@ -8,6 +8,8 @@ import jakarta.ws.rs.core.Response;
 import org.blog.core.dto.UsuarioDTO;
 import org.blog.core.service.IUsuarioService;
 
+import java.util.List;
+
 @Path("/admin/usuarios")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
@@ -38,6 +40,11 @@ public class UsuarioAdminController {
     public Response updateRole(@PathParam("id") Long id, UsuarioDTO updateDTO) {
         usuarioService.alterarRole(id, updateDTO.getRole());
         return Response.status(Response.Status.NO_CONTENT).build();
+    }
+
+    @GET
+    public List<UsuarioDTO> listAllUsers() {
+        return usuarioService.listAllUsersDTO();
     }
     
 
