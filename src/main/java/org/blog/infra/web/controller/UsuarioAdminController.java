@@ -19,22 +19,6 @@ public class UsuarioAdminController {
     @Inject
     IUsuarioService usuarioService;
 
-    @POST
-    @Path("/register")
-    public Response create(UsuarioDTO novoUsuario) { 
-        try {
-            UsuarioDTO created = usuarioService.criarNovoUsuario(
-                novoUsuario.getNome(), 
-                novoUsuario.getEmail(), 
-                novoUsuario.getSenha(),
-                novoUsuario.getRole()
-            );
-            return Response.status(Response.Status.CREATED).entity(created).build();
-        } catch (IllegalAccessException e) {
-            return Response.status(Response.Status.CONFLICT).entity(e.getMessage()).build();
-        }
-    }
-
     @PUT
     @Path("/{id}/role")
     public Response updateRole(@PathParam("id") Long id, UsuarioDTO updateDTO) {
